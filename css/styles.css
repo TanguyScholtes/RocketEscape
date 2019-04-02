@@ -5,6 +5,15 @@ html{
     background-image: url( '../img/spiration-dark.png' );
 }
 
+a, a:visited{
+    color: #b73126;
+    transition: color 500ms ease;
+}
+a:focus, a:hover{
+    color: rgb(250, 110, 65);
+    transition: color 500ms ease;
+}
+
 body{
     position: absolute;
     top: 50%;

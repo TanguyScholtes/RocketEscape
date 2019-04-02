@@ -6,9 +6,10 @@
     const gameWidth = 256;
     const gameHeight = 256;
     const speed = 3;
-    const difficulty = 3;
+    const difficulty = 2;
     let ticker = 0;
     let gameState = "paused";
+    let score = 0;
     let floor = {
         image: null,
         x: 0,
@@ -37,7 +38,6 @@
         document.body.onkeyup = ( e ) => {
             if( e.keyCode == 32 && gameState === "paused" ) {
                 // launch game
-                console.log("game start");
                 gameState = "started";
                 jumpDetection();
                 updateGame();
@@ -55,11 +55,12 @@
 
     function rng ( min, max ) {
         /*
-         * Generate a random number between given min and max (inclusives)
+         * Returns a random integer between given min & max included
          */
+
         min = Math.ceil( min );
         max = Math.floor( max );
-        return Math.floor( Math.random() * ( max - min +1 ) ) + min;
+        return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
     }
 
     function drawBackground () {
@@ -102,29 +103,51 @@
         } );
     }
 
+    function drawObstacle ( obstacle ) {
+        /*
+         * Draws an obstacle at given position
+         */
+         obstacle.image = new Image();
+         obstacle.image.src = "./img/obstacle.png";
+         obstacle.image.addEventListener( 'load', () => {
+             context.drawImage( obstacle.image, obstacle.x, obstacle.y);
+         } );
+    }
+
     function jumpDetection () {
         /*
          * Detects if player is pressing Spacebar
          * and make it jump if able (not already jumping)
          */
         document.body.onkeyup = ( e ) => {
-            if( e.keyCode == 32 && player.state === "running" ) {
+            if( e.keyCode == 32 && player.state === "running" && gameState === "started" ) {
                 // make player jump
-                console.log("fucker jumped !");
                 player.state = "jumping-asc";
             }
         };
+    }
+
+    function drawScore () {
+        context.font = '18px sans-serif';
+        context.fillText(`Score: ${score}`, 5, 20);
+    }
+
+    function endGame () {
+
     }
 
     function updateGame () {
         ticker += 1;
 
         if ( ticker%2 ) {
-            // Make floor & ennemies move
+            drawBackground();
+
+            // Make floor move
             floor.x -= speed;
             if ( floor.x <= -136 ) {
                 floor.x = 0;
             }
+            drawFloor();
 
             // Make player move if able
             // Ensure max jump height was no reached
@@ -139,20 +162,52 @@
             // Animate player
             if ( player.state === "jumping-asc" ) {
                 // Player is gainning height
-                player.y -= speed;
+                player.y -= speed*1.2;
             }
             if ( player.state === "jumping-desc" ) {
                 // Player is losing height
-                player.y += speed;
+                player.y += speed*0.8;
+            }
+            drawPlayer();
+
+            // Handle Obstacles & Collisions
+            if ( obstacles.length > 0 ) {
+                obstacles.forEach( ( obstacle, index ) => {
+                    if ( gameState === "started" ) {
+                        if ( obstacle.x <= player.x + 17 && obstacle.x + 18 >= player.x && obstacle.y - 25 <= player.y - 17 ) {
+                            // collision between the obstacle & the player
+                            gameState = "game over";
+                            return;
+                        } else {
+                            if ( obstacle.x + 18 <= player.x ) {
+                                // update score
+                                score += 10;
+                                // Delete obsolete obstacles
+                                obstacles.splice( index, 1 );
+                            } else {
+                                // Animate current obstacles
+                                obstacle.x -= speed;
+                                drawObstacle( obstacle );
+                            }
+                        }
+                    }
+                } );
+            }
+            // Generate new obstacles
+            if ( obstacles.length < difficulty && rng( 1, 20 )%5 ) {
+                obstacles.push( {
+                    x: rng( 257, 512 ),
+                    y: 215,
+                    image: null
+                } );
             }
 
-            // Delete obsolete obstacles
-            // Animate current obstacles
-            // Generate new obstacles
+            drawScore();
+        }
 
-            drawBackground();
-            drawFloor();
-            drawPlayer();
+        if ( gameState === "game over" ) {
+            endGame();
+            return;
         }
         requestAnimationFrame( updateGame );
     }
