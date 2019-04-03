@@ -34,16 +34,12 @@
         context = canvas.getContext("2d");
         context.font = '12px Pixel';
         try{
-            loadAllImages();
+            drawBackground();
         } finally {
             try{
-                drawBackground();
+                drawFloor();
             } finally {
-                try{
-                    drawFloor();
-                } finally {
-                    drawPlayer();
-                }
+                drawPlayer();
             }
         }
 
@@ -57,22 +53,6 @@
                 updateGame();
             }
         };
-    }
-
-    function loadAllImages () {
-        background = new Image();
-        background.src = "./img/background.png";
-        background.addEventListener( 'load', () => {
-            floor.image = new Image();
-            floor.image.src = "./img/grass.png";
-            floor.image.addEventListener( 'load', () => {
-                player.image = new Image();
-                player.image.src = "./img/pikachu-iddle.png";
-                player.image.addEventListener( 'load', () => {
-                    player.image.src = "./img/pikachu-running.png";
-                } );
-            } );
-        } );
     }
 
     function isCanvasSupported ( $canvasElt ) {
@@ -97,6 +77,8 @@
         /*
          * Draws the background image
          */
+        background = new Image();
+        background.src = "./img/background.png";
         background.addEventListener( 'load', () => {
             context.drawImage( background, 0, 0);
         } );
@@ -106,6 +88,8 @@
         /*
          * Draws the grassy floor image (three times as it is smaller than the canvas)
          */
+        floor.image = new Image();
+        floor.image.src = "./img/grass.png";
         floor.image.addEventListener( 'load', () => {
             context.drawImage( floor.image, floor.x, floor.y );
             context.drawImage( floor.image, floor.x + 136, floor.y );
@@ -118,8 +102,12 @@
          * Draws the player image at player's position
          */
         if( gameState === "paused" || ( ticker%speed && player.state === "running" ) ) {
+            console.log("iddle")
+            player.image = new Image();
             player.image.src = "./img/pikachu-iddle.png";
         } else {
+            console.log("running")
+            player.image = new Image();
             player.image.src = "./img/pikachu-running.png";
         }
         player.image.addEventListener( 'load', () => {
@@ -131,6 +119,7 @@
         /*
          * Draws an obstacle at given position
          */
+        obstacle.image = new Image();
         if( obstacle.src === 0 ) {
             obstacle.image.src = "./img/obstacle.png";
         } else {
