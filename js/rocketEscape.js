@@ -3,6 +3,8 @@
         context,
         background;
     let obstacles = [];
+    let radioTower = document.getElementById('radioTower');
+    let rocketHideout = document.getElementById('rocketHideout');
     const gameWidth = 256;
     const gameHeight = 256;
     const speed = 3;
@@ -46,6 +48,7 @@
             if( e.keyCode == 32 && gameState === "paused" ) {
                 // launch game
                 gameState = "started";
+                radioTower.play();
                 jumpDetection();
                 updateGame();
             }
@@ -116,11 +119,15 @@
         /*
          * Draws an obstacle at given position
          */
-         obstacle.image = new Image();
-         obstacle.image.src = "./img/obstacle.png";
-         obstacle.image.addEventListener( 'load', () => {
-             context.drawImage( obstacle.image, obstacle.x, obstacle.y);
-         } );
+        obstacle.image = new Image();
+        if( obstacle.src === 0 ) {
+            obstacle.image.src = "./img/obstacle.png";
+        } else {
+            obstacle.image.src = "./img/obstacleFemale.png";
+        }
+        obstacle.image.addEventListener( 'load', () => {
+            context.drawImage( obstacle.image, obstacle.x, obstacle.y);
+        } );
     }
 
     function jumpDetection () {
@@ -145,6 +152,8 @@
     }
 
     function endGame () {
+        radioTower.pause();
+        rocketHideout.play();
         context.fillText(`Game over!`, 65, 100);
         context.fillText(`Score: ${score}`, 65, 125);
     }
@@ -217,7 +226,8 @@
                 obstacles.push( {
                     x: rng( 257, 512 ),
                     y: 215,
-                    image: null
+                    image: null,
+                    src: rng( 0, 1 )
                 } );
             }
         }
