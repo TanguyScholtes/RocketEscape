@@ -30,9 +30,16 @@
         }
 
         context = canvas.getContext("2d");
-        drawBackground();
-        drawFloor();
-        drawPlayer();
+        context.font = '12px Pixel';
+        try{
+            drawBackground();
+        } finally {
+            try{
+                drawFloor();
+            } finally {
+                drawPlayer();
+            }
+        }
 
         // Wait for player to start game by pressing spacebar
         document.body.onkeyup = ( e ) => {
@@ -91,10 +98,12 @@
         /*
          * Draws the player image at player's position
          */
-        if( gameState === "paused" ) {
+        if( gameState === "paused" || ( ticker%speed && player.state === "running" ) ) {
+            console.log("iddle")
             player.image = new Image();
             player.image.src = "./img/pikachu-iddle.png";
         } else {
+            console.log("running")
             player.image = new Image();
             player.image.src = "./img/pikachu-running.png";
         }
@@ -128,16 +137,25 @@
     }
 
     function drawScore () {
-        context.font = '18px sans-serif';
         context.fillText(`Score: ${score}`, 5, 20);
     }
 
-    function endGame () {
+    function drawStartScreen () {
+        context.fillText(`Press spacebar to start`, 50, 110);
+    }
 
+    function endGame () {
+        context.fillText(`Game over!`, 65, 100);
+        context.fillText(`Score: ${score}`, 65, 125);
     }
 
     function updateGame () {
         ticker += 1;
+
+        if ( gameState == "game over" ) {
+            endGame();
+            return;
+        }
 
         if ( ticker%2 ) {
             drawBackground();
@@ -177,6 +195,7 @@
                         if ( obstacle.x <= player.x + 17 && obstacle.x + 18 >= player.x && obstacle.y - 25 <= player.y - 17 ) {
                             // collision between the obstacle & the player
                             gameState = "game over";
+                            drawObstacle( obstacle );
                             return;
                         } else {
                             if ( obstacle.x + 18 <= player.x ) {
@@ -201,14 +220,9 @@
                     image: null
                 } );
             }
-
-            drawScore();
         }
 
-        if ( gameState === "game over" ) {
-            endGame();
-            return;
-        }
+        drawScore();
         requestAnimationFrame( updateGame );
     }
 
