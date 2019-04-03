@@ -167,69 +167,75 @@
         }
 
         if ( ticker%2 ) {
-            drawBackground();
-
-            // Make floor move
-            floor.x -= speed;
-            if ( floor.x <= -136 ) {
-                floor.x = 0;
-            }
-            drawFloor();
-
-            // Make player move if able
-            // Ensure max jump height was no reached
-            if ( player.y < ( 222 - 51 ) ) {
-                player.y = 222 - 51;
-                player.state = "jumping-desc";
-            }
-            if ( player.y > 222 ) {
-                player.y = 222;
-                player.state = "running";
-            }
-            // Animate player
-            if ( player.state === "jumping-asc" ) {
-                // Player is gainning height
-                player.y -= speed*1.2;
-            }
-            if ( player.state === "jumping-desc" ) {
-                // Player is losing height
-                player.y += speed*0.8;
-            }
-            drawPlayer();
-
-            // Handle Obstacles & Collisions
-            if ( obstacles.length > 0 ) {
-                obstacles.forEach( ( obstacle, index ) => {
-                    if ( gameState === "started" ) {
-                        if ( obstacle.x <= player.x + 17 && obstacle.x + 18 >= player.x && obstacle.y - 25 <= player.y - 17 ) {
-                            // collision between the obstacle & the player
-                            gameState = "game over";
-                            drawObstacle( obstacle );
-                            return;
-                        } else {
-                            if ( obstacle.x + 18 <= player.x ) {
-                                // update score
-                                score += 10;
-                                // Delete obsolete obstacles
-                                obstacles.splice( index, 1 );
-                            } else {
-                                // Animate current obstacles
-                                obstacle.x -= speed;
-                                drawObstacle( obstacle );
-                            }
+            try {
+                drawBackground();
+            } finally {
+                try {
+                    // Make floor move
+                    floor.x -= speed;
+                    if ( floor.x <= -136 ) {
+                        floor.x = 0;
+                    }
+                    drawFloor();
+                } finally {
+                    try {
+                        // Make player move if able
+                        // Ensure max jump height was no reached
+                        if ( player.y < ( 222 - 51 ) ) {
+                            player.y = 222 - 51;
+                            player.state = "jumping-desc";
+                        }
+                        if ( player.y > 222 ) {
+                            player.y = 222;
+                            player.state = "running";
+                        }
+                        // Animate player
+                        if ( player.state === "jumping-asc" ) {
+                            // Player is gainning height
+                            player.y -= speed*1.2;
+                        }
+                        if ( player.state === "jumping-desc" ) {
+                            // Player is losing height
+                            player.y += speed*0.8;
+                        }
+                        drawPlayer();
+                    } finally {
+                        // Handle Obstacles & Collisions
+                        if ( obstacles.length > 0 ) {
+                            obstacles.forEach( ( obstacle, index ) => {
+                                if ( gameState === "started" ) {
+                                    if ( obstacle.x <= player.x + 17 && obstacle.x + 18 >= player.x && obstacle.y - 25 <= player.y - 17 ) {
+                                        // collision between the obstacle & the player
+                                        gameState = "game over";
+                                        drawObstacle( obstacle );
+                                        return;
+                                    } else {
+                                        if ( obstacle.x + 18 <= player.x ) {
+                                            // update score
+                                            score += 10;
+                                            // Delete obsolete obstacles
+                                            obstacles.splice( index, 1 );
+                                        } else {
+                                            // Animate current obstacles
+                                            obstacle.x -= speed;
+                                            drawObstacle( obstacle );
+                                        }
+                                    }
+                                }
+                            } );
+                        }
+                        // Generate new obstacles
+                        if ( obstacles.length < difficulty && rng( 1, 20 )%5 ) {
+                            obstacles.push( {
+                                x: rng( 257, 512 ),
+                                y: 215,
+                                image: null,
+                                src: rng( 0, 1 )
+                            } );
                         }
                     }
-                } );
-            }
-            // Generate new obstacles
-            if ( obstacles.length < difficulty && rng( 1, 20 )%5 ) {
-                obstacles.push( {
-                    x: rng( 257, 512 ),
-                    y: 215,
-                    image: null,
-                    src: rng( 0, 1 )
-                } );
-            }
+                }
+            }            
         }
 
         drawScore();
